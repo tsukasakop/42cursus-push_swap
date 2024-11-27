@@ -58,6 +58,8 @@ t_stack *str2stack(char *s)
 t_stack *int2stack(int i)
 {
 	t_stack *p;
+//	printf("%d", i);
+
 	p = malloc(sizeof(t_stack));
 	if(!p)
 		return NULL;
@@ -103,6 +105,33 @@ void	del_status(void *ptr)
 	free(p);
 	return;
 }
+
+bool	equal_stack(t_stack *lhs, t_stack *rhs)
+{
+	t_stack *cur_l;
+	t_stack *cur_r;
+
+	cur_l = lhs;
+	cur_r = rhs;
+	if(!cur_l || !cur_r)
+		return cur_l == cur_r;
+	if(cur_l->val != cur_r->val)
+		return false;
+	while(cur_l != lhs || cur_r != rhs)
+	{
+		if(cur_l->val != cur_r->val)
+			return false;
+		cur_l = cur_l->next;
+		cur_r = cur_r->next;
+	}
+	return (cur_l == lhs && cur_r == rhs);
+}
+
+bool	equal_state(t_state *lhs, t_state *rhs)
+{
+	return equal_stack(lhs->a, rhs->a) && equal_stack(lhs->b, rhs->b);
+}
+
 
 void	print_state(t_state *s)
 {
@@ -208,6 +237,7 @@ t_stack *dup_stack(t_stack *s)
 
 t_state *dup_state(t_state *s)
 {
+	//print_state(s);
 	t_state *p;
 	p = (t_state *)calloc(sizeof(t_state), 1);
 	if (!p)
@@ -221,6 +251,7 @@ t_state *dup_state(t_state *s)
 		free(p);
 		return NULL;
 	}
+	//print_state(p);
 	return p;
 }
 
@@ -364,7 +395,21 @@ t_state *get_state(t_state *s, t_action a)
 	act[RRA] = rra;
 	act[RRB] = rrb;
 	act[RRR] = rrr;
-	act[a](s);
+	printf("act: %d\n", a);
+	//print_state(s);
+	//print_state(ch);
+	act[a](ch);
+	if(equal_state(s, ch))
+	{
+		printf("eq\n");
+		del_status(ch);
+		ch = NULL;
+	}
+	else
+	{
+	print_state(s);
+	print_state(ch);
+	}	
 	return ch;
 }
 
@@ -381,15 +426,13 @@ bool	emulate_action(t_state *s, int gen)
 		if(!s->ch[i])
 		{
 			s->ch[i] = get_state(s, i);
-			if (!s->ch[i])
-				return false;
 		}
 		i++;
 	}
 	i = SA;
 	while(i < N_ACTION)
 	{
-		if (!emulate_action(s->ch[i], gen-1))
+		if (s->ch[i] && !emulate_action(s->ch[i], gen-1))
 			return false;
 		i++;
 	}
@@ -422,7 +465,10 @@ int main(int argc, char** argv)
 	printf("argc=%d\n", argc);
 	validate_arg(argc-1, argv+1);
 	g = init_game(argc-1, argv+1);
-	run_game(g, 3);
+	run_game(g, 6);
+//	print_state(g->cur);
+//	print_state(get_state(g->cur, PA));
+//	print_state(get_state(g->cur, SA));
 	del_game(g);
 }
 
@@ -457,4 +503,4 @@ void	test_state(t_game *g)
 	print_state(g->cur);
 	rrr(g->cur);
 	print_state(g->cur);
-}	
+}
