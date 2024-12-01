@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <sys/errno.h>
+#include <limits.h>
 
 void	raise_err(char *msg)
 {
@@ -88,6 +89,19 @@ void	del_stack(void *ptr)
 	}
 }
 
+void	del_state(void *ptr)
+{
+	t_state *p;
+	if(!ptr)
+		return;
+	p = (t_state *)ptr;
+	if(p->a)
+		del_stack(p->a);
+	if(p->b)
+		del_stack(p->b);
+	free(p);
+}
+
 void	del_status(void *ptr)
 {
 	t_state *p;
@@ -103,7 +117,6 @@ void	del_status(void *ptr)
 	while(i<N_ACTION)
 		del_status(p->ch[i++]);
 	free(p);
-	return;
 }
 
 bool	equal_stack(t_stack *lhs, t_stack *rhs)
@@ -132,6 +145,23 @@ bool	equal_state(t_state *lhs, t_state *rhs)
 	return equal_stack(lhs->a, rhs->a) && equal_stack(lhs->b, rhs->b);
 }
 
+void	print_status(t_state *s, int nest)
+{
+	t_action i; i =SA;
+	int n;
+	n=nest;
+	while(n--)
+		printf("\t");
+	printf("%p\n", s);
+	if(!s)
+		return;
+	while(i < N_ACTION)
+	{
+		if(s->ch[i])
+			print_status(s->ch[i], nest+1);
+		i++;
+	}	
+}
 
 void	print_state(t_state *s)
 {
@@ -183,6 +213,7 @@ t_state *arg2state(int n, char **s)
 	}
 	cur->next = state->a;
 	state->a->prev = cur;
+	state->score = get_score(state);
 	return state;	
 }
 
@@ -377,6 +408,87 @@ void	rrr(t_state *s)
 	rrb(s);
 }
 
+int count_slope(t_stack *s)
+{
+	if (!s)
+		return 0;
+	bool	is_increase;
+	t_stack *cur; cur = s;
+	int cnt = 1;
+	is_increase = cur->next->val > cur->val;
+	cur = cur->next;
+	while(cur->next != s)
+	{
+		if(is_increase ^ (cur->next->val > cur->val))
+		{
+			is_increase = cur->next->val > cur->val;
+			cnt++;
+		}
+		cur = cur->next;
+	}
+	return cnt;
+}
+
+int	get_score(t_state *s)
+{
+	if(s->score)
+		return s->score;
+	int sa;sa = count_slope(s->a);
+	int sb;sb = count_slope(s->b);
+	if(sa == 1 && sb == 0)
+		return 0;
+	return sa+sb;
+}
+
+int min_int(int lhs, int rhs)
+{
+	if(lhs < rhs)
+		return lhs;
+	else
+		return rhs;
+}
+
+int get_best_score(t_state *s)
+{
+	int score;
+	t_action i;
+	if (s->score == 0)
+		return 0;
+	i = SA;
+	score = INT_MAX;
+	while(i < N_ACTION)
+	{
+		if (s->ch[i])
+			score = min_int(score, get_best_score(s->ch[i]) + 1);
+		i++;
+	}
+	return min_int(score, s->score << 4);
+}
+
+t_action	get_best_action(t_state *s)
+{
+	t_action cur;
+	t_action best;
+	int best_score;
+	int	cur_score;
+	best_score = INT_MAX;
+	cur = SA;
+	while(cur < N_ACTION)
+	{
+		if(s->ch[cur])
+		{
+			cur_score = get_best_score(s->ch[cur]);
+			if(cur_score < best_score)
+			{
+				best_score = cur_score;
+				best = cur;
+			}
+		}
+		cur++;
+	}
+	return best;
+}
+
 t_state *get_state(t_state *s, t_action a)
 {
 	t_state *ch;
@@ -395,21 +507,13 @@ t_state *get_state(t_state *s, t_action a)
 	act[RRA] = rra;
 	act[RRB] = rrb;
 	act[RRR] = rrr;
-	printf("act: %d\n", a);
-	//print_state(s);
-	//print_state(ch);
 	act[a](ch);
 	if(equal_state(s, ch))
 	{
-		printf("eq\n");
 		del_status(ch);
-		ch = NULL;
+		return NULL;
 	}
-	else
-	{
-	print_state(s);
-	print_state(ch);
-	}	
+	ch->score = get_score(ch);
 	return ch;
 }
 
@@ -417,16 +521,13 @@ bool	emulate_action(t_state *s, int gen)
 {
 	t_action	i;
 
-	//printf("gen: %d\n", gen);
 	if (gen < 1)
 		return true;
 	i = SA;
 	while(i < N_ACTION)
 	{
 		if(!s->ch[i])
-		{
 			s->ch[i] = get_state(s, i);
-		}
 		i++;
 	}
 	i = SA;
@@ -449,12 +550,52 @@ void del_game(void *ptr)
 	free(p);
 }
 
+void	print_action(t_action a)
+{
+	char *names[N_ACTION];
+	names[SA] = "sa";
+	names[SB] = "sb";
+	names[SS] = "ss";
+	names[PA] = "pa";
+	names[PB] = "pb";
+	names[RA] = "ra";
+	names[RB] = "rb";
+	names[RR] = "rr";
+	names[RRA] = "rra";
+	names[RRB] = "rrb";
+	names[RRR] = "rrr";
+	printf("%s\n", names[a]);
+}
+
+void	proceed_state(t_state **s, t_action a)
+{
+	t_action cur;
+	cur = SA;
+	while(cur < N_ACTION)
+	{
+		if(cur != a)
+			del_status((*s)->ch[cur]);
+		cur++;
+	}
+	t_state *prev; prev = *s;
+	*s = (*s)->ch[a];
+	print_action(a);
+	print_state(*s);
+	del_state(prev);
+}
+	
 void	run_game(t_game *g, int gen)
 {
-	if (!emulate_action(g->cur, gen))
+	while(g->cur->score)
 	{
-		del_game(g);
-		raise_err("Error: emulate failed");
+		if (!emulate_action(g->cur, gen))
+		{
+			del_game(g);
+			raise_err("Error: emulate failed");
+		}
+		//print_status(g->cur, 0);
+		t_action a; a=get_best_action(g->cur);
+		proceed_state(&(g->cur), a);
 	}
 }
 
@@ -462,10 +603,9 @@ int main(int argc, char** argv)
 {
 	t_game *g;
 
-	printf("argc=%d\n", argc);
 	validate_arg(argc-1, argv+1);
 	g = init_game(argc-1, argv+1);
-	run_game(g, 6);
+	run_game(g, N_STEPS_TO_READ);
 //	print_state(g->cur);
 //	print_state(get_state(g->cur, PA));
 //	print_state(get_state(g->cur, SA));

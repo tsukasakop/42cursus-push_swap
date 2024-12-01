@@ -1,7 +1,10 @@
 #ifndef PUSH_SWAP_H
 # define PUSH_SWAP_H
 
-#define N_ACTION 11
+# define N_ACTION 11
+#ifndef N_STEPS_TO_READ
+# define N_STEPS_TO_READ 1
+#endif
 
 typedef enum e_action
 {
@@ -62,8 +65,9 @@ void	rrr(t_state *s);
 
 t_state* get_given_state(int argc, char** argv);
 t_state* dup_state(t_state* s);
-void	del_state(t_state* s);
 void	calc_score(t_state* s);
+
+int get_score(t_state *s);
 
 t_state* arg2state(int c, char **v);
 t_game* init_game(int c, char **v);
