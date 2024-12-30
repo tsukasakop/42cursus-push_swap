@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:24:34 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:28:15 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 05:26:46 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ bool	raise_up(t_stack **s, t_state *state, int val)
 	if (cnt == -1)
 		return (false);
 	size = dllst_len(*s);
-	if (cnt < (ssize_t)size / 2 && *s == state->a)
+	if (cnt <= (ssize_t)size / 2 && *s == state->a)
 		f = ra;
-	else if (cnt < (ssize_t)size / 2 && *s == state->b)
+	else if (cnt <= (ssize_t)size / 2 && *s == state->b)
 		f = rb;
-	else if (cnt >= (ssize_t)size / 2)
+	else if (cnt > (ssize_t)size / 2)
 	{
 		cnt = size - cnt;
 		if (*s == state->a)

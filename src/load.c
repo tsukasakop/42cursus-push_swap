@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:29:53 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 05:19:09 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 05:23:55 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,3 +92,4 @@ t_state	*arg2state(int n, char **s)
 	state->a->prev = cur;
 	state->b = NULL;
 	return (state);
+}
