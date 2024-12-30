@@ -6,7 +6,18 @@
 # define N_STEPS_TO_READ 1
 #endif
 
-typedef enum e_action
+#define PRINT(...) printf(__VA_ARGS__)
+
+#include <stdbool.h>
+
+typedef enum e_action t_action;
+typedef struct s_dllst t_dllst;
+typedef struct s_state t_state;
+typedef struct s_game t_game;
+
+typedef t_dllst t_stack;
+
+enum e_action
 {
 	SA,
 	SB,
@@ -19,49 +30,41 @@ typedef enum e_action
 	RRA,
 	RRB,
 	RRR
-}	t_action;
+};
 
-typedef struct s_stack
+struct s_dllst
 {
 	int val;
-	struct s_stack *prev;
-	struct s_stack *next;
-}	t_stack;
+	struct s_dllst *prev;
+	struct s_dllst *next;
+};
 
-typedef struct s_state
+struct s_state
 {
-	int	score;
 	t_stack	*a;
 	t_stack	*b;
-	struct s_state *ch[N_ACTION];
-}	t_state;
+};
 
-typedef struct
-{
-}	t_set;
-
-typedef struct
+struct s_game
 {
 	t_state *cur;
-	t_set *set;
-}	t_game;
+};
 
-void	swap(t_stack **s);
-void	push(t_stack **lhs, t_stack **rhs);
-void	rotate(t_stack **s);
-void	r_rotate(t_stack **s);
-
-void	sa(t_state *s);
-void	sb(t_state *s);
-void	ss(t_state *s);
-void	pa(t_state *s);
-void	pb(t_state *s);
-void	ra(t_state *s);
-void	rb(t_state *s);
-void	rr(t_state *s);
-void	rra(t_state *s);
-void	rrb(t_state *s);
-void	rrr(t_state *s);
+bool	swap(t_stack **s);
+bool	push(t_stack **lhs, t_stack **rhs);
+bool	rotate(t_stack **s);
+bool	r_rotate(t_stack **s);
+bool	sa(t_state *s);
+bool	sb(t_state *s);
+bool	ss(t_state *s);
+bool	pa(t_state *s);
+bool	pb(t_state *s);
+bool	ra(t_state *s);
+bool	rb(t_state *s);
+bool	rr(t_state *s);
+bool	rra(t_state *s);
+bool	rrb(t_state *s);
+bool	rrr(t_state *s);
 
 t_state* get_given_state(int argc, char** argv);
 t_state* dup_state(t_state* s);

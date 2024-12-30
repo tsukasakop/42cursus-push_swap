@@ -8,6 +8,65 @@
 #include <sys/errno.h>
 #include <limits.h>
 
+void	node_print(t_stack *s, size_t i, void *params)
+{
+	(void)i;
+	(void)params;
+	PRINT("(%p)", s);
+	PRINT("%d, ", s->val);
+}
+
+void	dllst_iter(t_dllst *s, void(*f)(t_dllst *s, size_t i, void *params), void *params)
+{
+	t_dllst *cur;
+	cur = s;
+	size_t i;
+	i = 0;
+	if(s == NULL)
+		return;
+	f(cur, i, params);
+	cur = cur->next;
+	i++;
+	while (cur != s)
+	{
+		f(cur, i, params);
+		cur = cur->next;
+		i++;
+	}
+}
+
+void	dllst_print(t_stack *s)
+{
+	dllst_iter(s, node_print, NULL);
+	PRINT("\n");
+}
+
+void	print_state(t_state *s)
+{
+	PRINT(".a(%p) = ", s->a);
+	dllst_print(s->a);
+	PRINT(".b(%p) = ", s->b);
+	dllst_print(s->b);
+}
+
+static void	cntup(t_dllst *s, size_t i, void *p)
+{
+	(void)s;
+	(void)i;
+	++*(size_t *)p;
+}
+
+size_t	dllst_len(t_dllst *s)
+{
+	if(s == NULL)
+		return 0;
+	size_t cnt;
+	cnt = 0;
+	dllst_iter(s, cntup, &cnt);
+	return cnt;
+}
+
+
 void	raise_err(char *msg)
 {
 	if (!msg)
@@ -59,7 +118,6 @@ t_stack *str2stack(char *s)
 t_stack *int2stack(int i)
 {
 	t_stack *p;
-//	printf("%d", i);
 
 	p = malloc(sizeof(t_stack));
 	if(!p)
@@ -113,9 +171,6 @@ void	del_status(void *ptr)
 	if(p->b)
 		del_stack(p->b);
 	size_t i;
-	i=0;
-	while(i<N_ACTION)
-		del_status(p->ch[i++]);
 	free(p);
 }
 
@@ -145,55 +200,6 @@ bool	equal_state(t_state *lhs, t_state *rhs)
 	return equal_stack(lhs->a, rhs->a) && equal_stack(lhs->b, rhs->b);
 }
 
-void	print_status(t_state *s, int nest)
-{
-	t_action i; i =SA;
-	int n;
-	n=nest;
-	while(n--)
-		printf("\t");
-	printf("%p\n", s);
-	if(!s)
-		return;
-	while(i < N_ACTION)
-	{
-		if(s->ch[i])
-			print_status(s->ch[i], nest+1);
-		i++;
-	}	
-}
-
-void	print_state(t_state *s)
-{
-	printf(".score = %d,\n", s->score);
-	t_stack *i;
-	i = s->a;
-	printf(".a(%p) = ", i);
-	if (i)
-	{
-		printf("%d, ", i->val);
-		i = i->next;
-		while(i != s->a)
-		{
-			printf("%d, ", i->val);
-			i = i->next;
-		}
-	};
-	i = s->b;
-	printf("\n.b(%p) = ", i);
-	if (i)
-	{
-		printf("%d, ", i->val);
-		i = i->next;
-		while(i != s->b)
-		{
-			printf("%d, ", i->val);
-			i = i->next;
-		}
-	}
-	printf("\n");
-}
-
 t_state *arg2state(int n, char **s)
 {
 	t_state *state;
@@ -213,7 +219,7 @@ t_state *arg2state(int n, char **s)
 	}
 	cur->next = state->a;
 	state->a->prev = cur;
-	state->score = get_score(state);
+	state->b = NULL;
 	return state;	
 }
 
@@ -223,7 +229,6 @@ t_game *init_game(int c, char** v)
 	game = malloc(sizeof(t_game));
 	assert_null((void *)game, NULL, NULL);
 	game->cur = arg2state(c, v);
-	game->set = NULL;
 	return game;
 }
 
@@ -236,308 +241,147 @@ void validate_arg(int c, char** v)
 	return;
 }
 
-t_stack *dup_stack(t_stack *s)
+t_stack	*pop(t_stack **s)
 {
-	t_stack *p;
-	t_stack *cur_orig;
-	t_stack *cur_dup;
+	t_stack *ret;
 
-	if(!s)
+	if (dllst_len(*s) == 0)
 		return NULL;
-	p = int2stack(s->val);
-	if(!p)
-		return NULL;
-	cur_orig = s;
-	cur_dup = p;
-	while(cur_orig->next != s)
+	if (dllst_len(*s) == 1)
 	{
-		cur_dup->next = int2stack(cur_orig->next->val);
-		if (!cur_dup->next)
-		{
-			del_stack(p);
-			return NULL;
-		}
-		cur_dup->next->prev = cur_dup;
-		cur_dup = cur_dup->next;
-		cur_orig = cur_orig->next;
+		ret = *s;
+		*s = NULL;
+		return ret;
 	}
-	cur_dup->next = p;
-	p->prev = cur_dup;
-	return p;
+	ret = *s;
+	(*s)->prev->next = (*s)->next;
+	(*s)->next->prev = (*s)->prev;
+	*s = (*s)->next;
+	return ret;
 }
 
-t_state *dup_state(t_state *s)
+bool	insert(t_stack **s, t_stack *i)
 {
-	//print_state(s);
-	t_state *p;
-	p = (t_state *)calloc(sizeof(t_state), 1);
-	if (!p)
-		return NULL;
-	p->a = dup_stack(s->a);
-	p->b = dup_stack(s->b);
-	if ((s->a && !p->a) || (s->b && !p->b))
+	if(i == NULL)
+		return false;
+	if (dllst_len(*s) == 0)
 	{
-		free(p->a);
-		free(p->b);
-		free(p);
-		return NULL;
+		i->next = i;
+		i->prev = i;
 	}
-	//print_state(p);
-	return p;
+	else
+	{
+		i->next = *s;
+		i->prev = (*s)->prev;
+		(*s)->prev->next = i;
+		(*s)->prev = i;
+	}
+	*s = i;
+	return true;
 }
 
-void	swap(t_stack **s)
+bool	swap(t_stack **s)
 {
-	t_stack *cur;
-	t_stack *last;
-
-	if (!*s || !(*s)->next)
-		return;
-	cur = *s;
-	last = (*s)->prev;
-
-	cur->prev = cur->next;
-	cur->next = cur->prev->next;
-	cur->next->prev = cur;
-	cur = cur->prev;
-	cur->next = cur->prev;
-	cur->prev = last;
-	last->next = cur;
-	*s = cur;
+	if (dllst_len(*s) < 2)
+		return false;
+	if ((*s)->next == (*s)->prev)
+		return rotate(s);
+	t_stack *tmp = pop(s);
+	rotate(s);
+	insert(s, tmp);
+	r_rotate(s);
+	/*
+	(*s)->prev->next = (*s)->next;
+	(*s)->next->next->prev = (*s);
+	(*s)->next->prev = (*s)->prev;
+	(*s)->prev = (*s)->next;
+	(*s)->next = (*s)->next->next;
+	(*s)->next->next = (*s);
+	*/
+	return true;
 }
 
-void	push(t_stack **lhs, t_stack **rhs)
+bool	push(t_stack **lhs, t_stack **rhs)
 {
 	t_stack *tmp;
-	if (!*lhs)
-		return;
-	tmp = *lhs;
-	if (*lhs == (*lhs)->next)
-		*lhs = NULL;	
-	else
-	{
-		*lhs = tmp->next;
-		tmp->next->prev = tmp->prev;
-		tmp->prev->next = tmp->next;
-	}
-	if(!*rhs)
-	{
-		*rhs = tmp;
-		tmp->next = tmp;
-		tmp->prev = tmp;
-	}
-	else
-	{
-		tmp->next = *rhs;
-		tmp->prev = (*rhs)->prev;
-		tmp->next->prev = tmp;
-		tmp->prev->next = tmp;
-		*rhs = tmp;
-	}
+
+	if (dllst_len(*lhs) == 0)
+		return false;
+	tmp = pop(lhs);
+	if(tmp == NULL)
+		return false;
+	return insert(rhs, tmp);
 }
 
-void	rotate(t_stack **s)
+bool	rotate(t_stack **s)
 {
-	if (!*s)
-		return;
+	if (dllst_len(*s) < 2)
+		return false;
 	*s = (*s)->next;
-}
-
-void	r_rotate(t_stack **s)
-{
-	if (!*s)
-		return;
-	*s = (*s)->prev;
-}
-
-void	sa(t_state *s)
-{
-	swap(&s->a);
-}
-
-void	sb(t_state *s)
-{
-	swap(&s->b);
-}
-
-void	ss(t_state *s)
-{
-	sa(s);
-	sb(s);
-}
-
-void	pa(t_state *s)
-{
-	push(&s->a, &s->b);
-}
-
-void	pb(t_state *s)
-{
-	push(&s->b, &s->a);
-}
-
-void	ra(t_state *s)
-{
-	rotate(&s->a);
-}
-
-void	rb(t_state *s)
-{
-	rotate(&s->b);
-}
-
-void	rr(t_state *s)
-{
-	ra(s);
-	rb(s);
-}
-
-void	rra(t_state *s)
-{
-	r_rotate(&s->a);
-}
-
-void	rrb(t_state *s)
-{
-	r_rotate(&s->b);
-}
-
-void	rrr(t_state *s)
-{
-	rra(s);
-	rrb(s);
-}
-
-int count_slope(t_stack *s)
-{
-	if (!s)
-		return 0;
-	bool	is_increase;
-	t_stack *cur; cur = s;
-	int cnt = 1;
-	is_increase = cur->next->val > cur->val;
-	cur = cur->next;
-	while(cur->next != s)
-	{
-		if(is_increase ^ (cur->next->val > cur->val))
-		{
-			is_increase = cur->next->val > cur->val;
-			cnt++;
-		}
-		cur = cur->next;
-	}
-	return cnt;
-}
-
-int	get_score(t_state *s)
-{
-	if(s->score)
-		return s->score;
-	int sa;sa = count_slope(s->a);
-	int sb;sb = count_slope(s->b);
-	if(sa == 1 && sb == 0)
-		return 0;
-	return sa+sb;
-}
-
-int min_int(int lhs, int rhs)
-{
-	if(lhs < rhs)
-		return lhs;
-	else
-		return rhs;
-}
-
-int get_best_score(t_state *s)
-{
-	int score;
-	t_action i;
-	if (s->score == 0)
-		return 0;
-	i = SA;
-	score = INT_MAX;
-	while(i < N_ACTION)
-	{
-		if (s->ch[i])
-			score = min_int(score, get_best_score(s->ch[i]) + 1);
-		i++;
-	}
-	return min_int(score, s->score << 4);
-}
-
-t_action	get_best_action(t_state *s)
-{
-	t_action cur;
-	t_action best;
-	int best_score;
-	int	cur_score;
-	best_score = INT_MAX;
-	cur = SA;
-	while(cur < N_ACTION)
-	{
-		if(s->ch[cur])
-		{
-			cur_score = get_best_score(s->ch[cur]);
-			if(cur_score < best_score)
-			{
-				best_score = cur_score;
-				best = cur;
-			}
-		}
-		cur++;
-	}
-	return best;
-}
-
-t_state *get_state(t_state *s, t_action a)
-{
-	t_state *ch;
-	ch = dup_state(s);
-	if (!ch)
-		return NULL;
-	void (*act[N_ACTION])(t_state *);
-	act[SA] = sa;
-	act[SB] = sb;
-	act[SS] = ss;
-	act[PA] = pa;
-	act[PB] = pb;
-	act[RA] = ra;
-	act[RB] = rb;
-	act[RR] = rr;
-	act[RRA] = rra;
-	act[RRB] = rrb;
-	act[RRR] = rrr;
-	act[a](ch);
-	if(equal_state(s, ch))
-	{
-		del_status(ch);
-		return NULL;
-	}
-	ch->score = get_score(ch);
-	return ch;
-}
-
-bool	emulate_action(t_state *s, int gen)
-{
-	t_action	i;
-
-	if (gen < 1)
-		return true;
-	i = SA;
-	while(i < N_ACTION)
-	{
-		if(!s->ch[i])
-			s->ch[i] = get_state(s, i);
-		i++;
-	}
-	i = SA;
-	while(i < N_ACTION)
-	{
-		if (s->ch[i] && !emulate_action(s->ch[i], gen-1))
-			return false;
-		i++;
-	}
 	return true;
+}
+
+bool	r_rotate(t_stack **s)
+{
+	if (dllst_len(*s) < 2)
+		return false;
+	*s = (*s)->prev;
+	return true;
+}
+
+bool	sa(t_state *s)
+{
+	return swap(&s->a);
+}
+
+bool	sb(t_state *s)
+{
+	return swap(&s->b);
+}
+
+bool	ss(t_state *s)
+{
+	return (dllst_len(s->b) >= 2 && sa(s) && sb(s));
+}
+
+bool	pa(t_state *s)
+{
+	return push(&s->a, &s->b);
+}
+
+bool	pb(t_state *s)
+{
+	return push(&s->b, &s->a);
+}
+
+bool	ra(t_state *s)
+{
+	return rotate(&s->a);
+}
+
+bool	rb(t_state *s)
+{
+	return rotate(&s->b);
+}
+
+bool	rr(t_state *s)
+{
+	return (dllst_len(s->b) >= 2 && ra(s) && rb(s));
+}
+
+bool	rra(t_state *s)
+{
+	return r_rotate(&s->a);
+}
+
+bool	rrb(t_state *s)
+{
+	return r_rotate(&s->b);
+}
+
+bool	rrr(t_state *s)
+{
+	return (dllst_len(s->b) >= 2 && rra(s) && rrb(s));
 }
 
 void del_game(void *ptr)
@@ -567,36 +411,158 @@ void	print_action(t_action a)
 	printf("%s\n", names[a]);
 }
 
-void	proceed_state(t_state **s, t_action a)
+bool	is_sorted_dll(t_dllst *s) 
 {
-	t_action cur;
-	cur = SA;
-	while(cur < N_ACTION)
+	if(s == NULL)
+		return true;
+	t_dllst *cur;
+	int prev;
+	cur = s->next;
+	prev = INT_MIN;
+	while (cur != s)
 	{
-		if(cur != a)
-			del_status((*s)->ch[cur]);
-		cur++;
+		if (cur->val < prev)
+			return false;
+		prev = cur->val;
+		cur = cur->next;
 	}
-	t_state *prev; prev = *s;
-	*s = (*s)->ch[a];
-	print_action(a);
-	print_state(*s);
-	del_state(prev);
+	return true;
 }
-	
-void	run_game(t_game *g, int gen)
+
+/*
+void	sort3(t_state *s)
 {
-	while(g->cur->score)
+	
+}
+
+void	run_game(t_game *g)
+{
+	size_t size;
+	size = dllst_len(size);
+	if (size == 2)
+		sa(g->cur);
+	if (size == 3)
+		sort3(g);
+	if (size == 5)
+		sort4(g);
+	if (size == 5)
+		sort5(g);
+	else
+		sort(g, size);
+}
+*/
+
+void	test_state(t_game *g)
+{
+	print_state(g->cur);
+	PRINT("Test pa\n");
+	pa(g->cur);
+	print_state(g->cur);
+	PRINT("Test pa\n");
+	pa(g->cur);
+	print_state(g->cur);
+	PRINT("Test pa\n");
+	pa(g->cur);
+	print_state(g->cur);
+	PRINT("Test pa\n");
+	pa(g->cur);
+	print_state(g->cur);
+	PRINT("Test pb\n");
+	pb(g->cur);
+	print_state(g->cur);
+	PRINT("Test sa\n");
+	sa(g->cur);
+	print_state(g->cur);
+	PRINT("Test sb\n");
+	sb(g->cur);
+	print_state(g->cur);
+	PRINT("Test ss\n");
+	ss(g->cur);
+	print_state(g->cur);
+	PRINT("Test ra\n");
+	ra(g->cur);
+	print_state(g->cur);
+	PRINT("Test rb\n");
+	rb(g->cur);
+	print_state(g->cur);
+	PRINT("Test rr\n");
+	rr(g->cur);
+	print_state(g->cur);
+	PRINT("Test rra\n");
+	rra(g->cur);
+	print_state(g->cur);
+	PRINT("Test rrb\n");
+	rrb(g->cur);
+	print_state(g->cur);
+	PRINT("Test rrr\n");
+	rrr(g->cur);
+	print_state(g->cur);
+/*
+*/
+}
+
+void	put_on_arr(t_dllst *n, size_t i, void *param)
+{
+	((t_dllst **)param)[i] = n;
+}
+
+t_dllst	**dllst2arr(t_stack *s)
+{
+	t_dllst **ar;
+
+	ar = (t_dllst **)calloc(sizeof(t_dllst *),dllst_len(s) + 1);
+	if (ar == NULL)
+		raise_err("malloc failed");
+	dllst_iter(s, put_on_arr, (void *)ar);
+	return ar;
+}
+
+void	swap_addr(void **lhs, void **rhs)
+{
+	void *tmp;
+
+	tmp = *lhs;
+	*lhs = *rhs;
+	*rhs = tmp;
+	return;
+}
+
+t_dllst	**sorted_arr(t_stack *s)
+{
+	t_dllst **ar;
+
+	ar = dllst2arr(s);
+	size_t i;
+	size_t j;
+	i = 0;
+	j = 0;
+	while(ar[i])
 	{
-		if (!emulate_action(g->cur, gen))
+		j = i + 1;
+		while(ar[j])
 		{
-			del_game(g);
-			raise_err("Error: emulate failed");
+			if (ar[j]->val < ar[i]->val)
+				swap_addr((void **)&ar[i], (void **)&ar[j]);
+			j++;
 		}
-		//print_status(g->cur, 0);
-		t_action a; a=get_best_action(g->cur);
-		proceed_state(&(g->cur), a);
+		i++;
 	}
+	return ar;
+}
+
+void	compress(t_stack *s)
+{
+	t_dllst **ar;
+
+	ar = sorted_arr(s);
+	size_t i;
+	i = 0;
+	while(ar[i])
+	{
+		ar[i]->val = (int)i;
+		i++;
+	}
+	free(ar);
 }
 
 int main(int argc, char** argv)
@@ -605,42 +571,11 @@ int main(int argc, char** argv)
 
 	validate_arg(argc-1, argv+1);
 	g = init_game(argc-1, argv+1);
-	run_game(g, N_STEPS_TO_READ);
-//	print_state(g->cur);
-//	print_state(get_state(g->cur, PA));
-//	print_state(get_state(g->cur, SA));
+	if(is_sorted_dll(g->cur->a))
+		exit(EXIT_SUCCESS);
+	compress(g->cur->a);
+	run_game(g);
+	//test_state(g);
 	del_game(g);
-}
-
-void	test_state(t_game *g)
-{
-	print_state(g->cur);
-	pa(g->cur);
-	print_state(g->cur);
-	pa(g->cur);
-	print_state(g->cur);
-	pa(g->cur);
-	print_state(g->cur);
-	pa(g->cur);
-	print_state(g->cur);
-	pb(g->cur);
-	print_state(g->cur);
-	sa(g->cur);
-	print_state(g->cur);
-	sb(g->cur);
-	print_state(g->cur);
-	ss(g->cur);
-	print_state(g->cur);
-	ra(g->cur);
-	print_state(g->cur);
-	rb(g->cur);
-	print_state(g->cur);
-	rr(g->cur);
-	print_state(g->cur);
-	rra(g->cur);
-	print_state(g->cur);
-	rrb(g->cur);
-	print_state(g->cur);
-	rrr(g->cur);
-	print_state(g->cur);
+	exit(EXIT_SUCCESS);
 }
