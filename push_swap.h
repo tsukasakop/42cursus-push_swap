@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 20:00:46 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/30 20:06:43 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 00:40:42 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,30 +20,15 @@
 
 #define PRINT(...) fprintf(stderr, __VA_ARGS__)
 #define ft_printf(...) printf(__VA_ARGS__)
+#define ft_fprintf(...) fprintf(__VA_ARGS__)
 
 #include <stdbool.h>
 
-typedef enum e_action t_action;
 typedef struct s_dllst t_dllst;
 typedef struct s_state t_state;
 typedef struct s_game t_game;
 
 typedef t_dllst t_stack;
-
-enum e_action
-{
-	SA,
-	SB,
-	SS,
-	PA,
-	PB,
-	RA,
-	RB,
-	RR,
-	RRA,
-	RRB,
-	RRR
-};
 
 struct s_dllst
 {

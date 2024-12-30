@@ -8,13 +8,6 @@
 #include <sys/errno.h>
 #include <limits.h>
 
-void	node_print(t_stack *s, size_t i, void *params)
-{
-	(void)i;
-	(void)params;
-	PRINT("%d ", s->val);
-}
-
 void	dllst_iter(t_dllst *s, void(*f)(t_dllst *s, size_t i, void *params), void *params)
 {
 	t_dllst *cur;
@@ -32,6 +25,13 @@ void	dllst_iter(t_dllst *s, void(*f)(t_dllst *s, size_t i, void *params), void *
 		cur = cur->next;
 		i++;
 	}
+}
+
+void	node_print(t_stack *s, size_t i, void *params)
+{
+	(void)i;
+	(void)params;
+	PRINT("%d ", s->val);
 }
 
 void	dllst_print(t_stack *s)
@@ -65,13 +65,9 @@ size_t	dllst_len(t_dllst *s)
 	return cnt;
 }
 
-
-void	raise_err(char *msg)
+void	raise_err()
 {
-	if (!msg)
-		msg = "Error";
-	//TODO: Replace to ft_fprintf
-	fprintf(stderr, "%s\n", msg);
+	ft_fprintf(stderr, "Error\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -81,7 +77,7 @@ void	assert_null(void * p, void *to_del, void (*del)(void *))
 		return;
 	if (to_del && del)
 		del(to_del);
-	raise_err("Error: null ptr provided.");
+	raise_err();
 }
 
 void	assert_integer(char *s, void *to_del, void (*del)(void *))
@@ -91,13 +87,13 @@ void	assert_integer(char *s, void *to_del, void (*del)(void *))
 		s++;
 	//TODO: Replace to ft_isdigit
 	if(!isdigit(*s))
-		raise_err("Error: no number provided.");
+		raise_err();
 	while(isdigit(*s))
 		s++;
 	if (*s)
 	{
 		printf("s=%s ", s);
-		raise_err("Error: invalid number provided.");
+		raise_err();
 	}
 }
 
@@ -234,7 +230,7 @@ t_game *init_game(int c, char** v)
 void validate_arg(int c, char** v)
 {
 	if(c == 0)
-		raise_err("Error: no number");
+		raise_err();
 	while(c--)
 		assert_integer(*v++, NULL, NULL);
 	return;
@@ -465,23 +461,6 @@ void del_game(void *ptr)
 	free(p);
 }
 
-void	print_action(t_action a)
-{
-	char *names[N_ACTION];
-	names[SA] = "sa";
-	names[SB] = "sb";
-	names[SS] = "ss";
-	names[PA] = "pa";
-	names[PB] = "pb";
-	names[RA] = "ra";
-	names[RB] = "rb";
-	names[RR] = "rr";
-	names[RRA] = "rra";
-	names[RRB] = "rrb";
-	names[RRR] = "rrr";
-	printf("%s\n", names[a]);
-}
-
 bool	is_sorted_dll(t_dllst *s) 
 {
 	if(s == NULL)
@@ -579,10 +558,7 @@ void	pb_all(t_state *s)
 	{
 		if(s->a->val > border)
 		{
-			if(s->b && s->b->val > s->a->val)
-				rr(s);
-			else
-				ra(s);
+			ra(s);
 			continue;
 		}
 		pb(s);
@@ -620,53 +596,6 @@ void	run_game(t_game *g)
 		sort_large(g->cur);
 }
 
-void	test_state(t_game *g)
-{
-	print_state(g->cur);
-	PRINT("Test pa\n");
-	pa(g->cur);
-	print_state(g->cur);
-	PRINT("Test pa\n");
-	pa(g->cur);
-	print_state(g->cur);
-	PRINT("Test pa\n");
-	pa(g->cur);
-	print_state(g->cur);
-	PRINT("Test pa\n");
-	pa(g->cur);
-	print_state(g->cur);
-	PRINT("Test pb\n");
-	pb(g->cur);
-	print_state(g->cur);
-	PRINT("Test sa\n");
-	sa(g->cur);
-	print_state(g->cur);
-	PRINT("Test sb\n");
-	sb(g->cur);
-	print_state(g->cur);
-	PRINT("Test ss\n");
-	ss(g->cur);
-	print_state(g->cur);
-	PRINT("Test ra\n");
-	ra(g->cur);
-	print_state(g->cur);
-	PRINT("Test rb\n");
-	rb(g->cur);
-	print_state(g->cur);
-	PRINT("Test rr\n");
-	rr(g->cur);
-	print_state(g->cur);
-	PRINT("Test rra\n");
-	rra(g->cur);
-	print_state(g->cur);
-	PRINT("Test rrb\n");
-	rrb(g->cur);
-	print_state(g->cur);
-	PRINT("Test rrr\n");
-	rrr(g->cur);
-	print_state(g->cur);
-}
-
 void	put_on_arr(t_dllst *n, size_t i, void *param)
 {
 	((t_dllst **)param)[i] = n;
@@ -678,7 +607,7 @@ t_dllst	**dllst2arr(t_stack *s)
 
 	ar = (t_dllst **)calloc(sizeof(t_dllst *),dllst_len(s) + 1);
 	if (ar == NULL)
-		raise_err("malloc failed");
+		raise_err();
 	dllst_iter(s, put_on_arr, (void *)ar);
 	return ar;
 }
