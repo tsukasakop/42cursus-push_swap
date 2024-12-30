@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:28:28 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:28:31 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:42:53 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,9 +68,7 @@ int	main(int argc, char **argv)
 	if (is_sorted_dll(g->cur->a))
 		exit(EXIT_SUCCESS);
 	compress(g->cur->a);
-	print_state(g->cur);
 	run_game(g);
-	print_state(g->cur);
 	del_game(g);
 	exit(EXIT_SUCCESS);
 }

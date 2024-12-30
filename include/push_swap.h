@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 20:00:46 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:32:44 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:40:45 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@
 # ifndef N_STEPS_TO_READ
 #  define N_STEPS_TO_READ 1
 # endif
-
-# define PRINT(...) ft_fprintf(ft_stderr(), __VA_ARGS__)
 
 # include <ctype.h>
 # include <ft_stdio.h>
