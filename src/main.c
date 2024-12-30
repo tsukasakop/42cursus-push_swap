@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:28:28 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:42:53 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:48:19 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ t_game	*init_game(int c, char **v)
 {
 	t_game	*game;
 
-	game = malloc(sizeof(t_game));
+	game = ft_g_mmmalloc(sizeof(t_game));
 	assert_null((void *)game, NULL, NULL);
 	game->cur = arg2state(c, v);
 	return (game);
@@ -63,12 +63,13 @@ int	main(int argc, char **argv)
 {
 	t_game	*g;
 
+	ft_atexit(ft_g_mmfree);
 	validate_arg(argc - 1, argv + 1);
 	g = init_game(argc - 1, argv + 1);
 	if (is_sorted_dll(g->cur->a))
-		exit(EXIT_SUCCESS);
+		raise_err();
 	compress(g->cur->a);
 	run_game(g);
 	del_game(g);
-	exit(EXIT_SUCCESS);
+	ft_exit(EXIT_SUCCESS);
 }

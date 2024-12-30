@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:23:19 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:23:22 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:46:18 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ t_dllst	**dllst2arr(t_stack *s)
 {
 	t_dllst	**ar;
 
-	ar = (t_dllst **)ft_calloc(sizeof(t_dllst *), dllst_len(s) + 1);
+	ar = (t_dllst **)ft_g_mmcalloc(sizeof(t_dllst *), dllst_len(s) + 1);
 	if (ar == NULL)
 		raise_err();
 	dllst_iter(s, put_on_arr, (void *)ar);

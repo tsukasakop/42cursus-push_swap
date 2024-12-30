@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:29:53 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:29:55 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:46:54 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ t_stack	*str2stack(char *s)
 {
 	t_stack	*p;
 
-	p = malloc(sizeof(t_stack));
+	p = ft_g_mmmalloc(sizeof(t_stack));
 	if (!p)
 		return (NULL);
 	p->val = ft_atoi((const char *)s);
@@ -29,7 +29,7 @@ t_stack	*int2stack(int i)
 {
 	t_stack	*p;
 
-	p = malloc(sizeof(t_stack));
+	p = ft_g_mmmalloc(sizeof(t_stack));
 	if (!p)
 		return (NULL);
 	p->val = i;
@@ -69,7 +69,7 @@ t_state	*arg2state(int n, char **s)
 	t_state	*state;
 	t_stack	*cur;
 
-	state = (t_state *)ft_calloc(sizeof(t_state), 1);
+	state = (t_state *)ft_g_mmcalloc(sizeof(t_state), 1);
 	assert_null((void *)state, NULL, NULL);
 	state->a = str2stack(*s);
 	assert_null((void *)state->a, state, del_status);
