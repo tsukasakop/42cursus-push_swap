@@ -6,20 +6,49 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:29:53 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:56:45 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 05:19:09 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
+long long	ft_strtoll(const char *s)
+{
+	long long	d;
+	long long	sign;
+
+	d = 0;
+	sign = 1;
+	if (*s == '-')
+		sign = -1;
+	if (*s == '-' || *s == '+')
+		++s;
+	while (*s)
+	{
+		if (!ft_isdigit(*s))
+			raise_err();
+		if (sign == 1 && d > LLONG_MAX - (*s - '0') / 10)
+			raise_err();
+		if (sign == -1 && d < LLONG_MIN + (*s - '0') / 10)
+			raise_err();
+		d = d * 10 + sign * (*s - '0');
+		s++;
+	}
+	return (d);
+}
+
 t_stack	*str2stack(char *s)
 {
-	t_stack	*p;
+	t_stack		*p;
+	long long	v;
 
 	p = ft_g_mmmalloc(sizeof(t_stack));
 	if (!p)
 		return (NULL);
-	p->val = ft_atoi((const char *)s);
+	v = ft_strtoll((const char *)s);
+	if (v > (long long)INT_MAX || v < (long long)INT_MIN)
+		raise_err();
+	p->val = (int)v;
 	p->prev = NULL;
 	p->next = NULL;
 	return (p);
@@ -38,51 +67,28 @@ t_stack	*int2stack(int i)
 	return (p);
 }
 
-bool	equal_stack(t_stack *lhs, t_stack *rhs)
-{
-	t_stack	*cur_l;
-	t_stack	*cur_r;
-
-	cur_l = lhs;
-	cur_r = rhs;
-	if (!cur_l || !cur_r)
-		return (cur_l == cur_r);
-	if (cur_l->val != cur_r->val)
-		return (false);
-	while (cur_l != lhs || cur_r != rhs)
-	{
-		if (cur_l->val != cur_r->val)
-			return (false);
-		cur_l = cur_l->next;
-		cur_r = cur_r->next;
-	}
-	return (cur_l == lhs && cur_r == rhs);
-}
-
-bool	equal_state(t_state *lhs, t_state *rhs)
-{
-	return (equal_stack(lhs->a, rhs->a) && equal_stack(lhs->b, rhs->b));
-}
-
 t_state	*arg2state(int n, char **s)
 {
 	t_state	*state;
 	t_stack	*cur;
 
-	state = (t_state *)ft_g_mmcalloc(sizeof(t_state), 1);
-	assert_null((void *)state);
-	state->a = str2stack(*s);
-	assert_null((void *)state->a);
-	cur = state->a;
-	while (--n)
+	state = (t_state *)assert_null((void *)ft_g_mmcalloc(sizeof(t_state), 1));
+	while (n--)
 	{
-		cur->next = str2stack(*++s);
-		assert_null((void *)cur->next);
-		cur->next->prev = cur;
-		cur = cur->next;
+		if (state->a == NULL)
+		{
+			state->a = (t_stack *)assert_null((void *)str2stack(*s));
+			cur = state->a;
+		}
+		else
+		{
+			cur->next = (t_stack *)assert_null((void *)str2stack(*s));
+			cur->next->prev = cur;
+			cur = cur->next;
+		}
+		s++;
 	}
 	cur->next = state->a;
 	state->a->prev = cur;
 	state->b = NULL;
 	return (state);
-}

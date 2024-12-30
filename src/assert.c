@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:23:42 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:54:57 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 05:02:31 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,12 @@ void	raise_err(void)
 	ft_exit(EXIT_FAILURE);
 }
 
-void	assert_null(void *p)
+void	*assert_null(void *p)
 {
 	if (p)
-		return ;
+		return (p);
 	raise_err();
+	return (NULL);
 }
 
 void	assert_integer(char *s)

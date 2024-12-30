@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:23:19 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:53:18 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 04:36:54 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ t_dllst	**sorted_arr(t_stack *s)
 		j = i + 1;
 		while (ar[j])
 		{
+			if (ar[j]->val == ar[i]->val)
+				raise_err();
 			if (ar[j]->val < ar[i]->val)
 				swap_addr((void **)&ar[i], (void **)&ar[j]);
 			j++;

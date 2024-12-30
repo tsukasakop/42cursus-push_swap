@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 20:00:46 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:55:37 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 04:53:48 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void					rra(t_state *s);
 void					rrb(t_state *s);
 void					rrr(t_state *s);
 void					raise_err(void);
-void					assert_null(void *p);
+void					*assert_null(void *p);
 void					assert_integer(char *s);
 bool					is_sorted_dll(t_dllst *s);
 int						intmin(int *ar, size_t s);
