@@ -9,3 +9,10 @@ for i in itertools.permutations(["0", "1", "2"]):
     print(f"echo \"{i}\";./a.out {" ".join(i)};echo;")
 ')
 ```
+
+- random 500 val
+
+```sh
+./push_swap $(shuf -i 1-1000000 -n 500) | wc -l
+```
+
