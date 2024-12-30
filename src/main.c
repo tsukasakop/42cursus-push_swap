@@ -1,28 +1,42 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/12/31 02:28:28 by tkondo            #+#    #+#             */
+/*   Updated: 2024/12/31 02:28:31 by tkondo           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "push_swap.h"
 
-t_game *init_game(int c, char** v)
+t_game	*init_game(int c, char **v)
 {
-	t_game *game;
+	t_game	*game;
+
 	game = malloc(sizeof(t_game));
 	assert_null((void *)game, NULL, NULL);
 	game->cur = arg2state(c, v);
-	return game;
+	return (game);
 }
 
-void validate_arg(int c, char** v)
+void	validate_arg(int c, char **v)
 {
-	if(c == 0)
+	if (c == 0)
 		raise_err();
-	while(c--)
+	while (c--)
 		assert_integer(*v++, NULL, NULL);
-	return;
+	return ;
 }
 
-void del_game(void *ptr)
+void	del_game(void *ptr)
 {
-	if(!ptr)
-		return;
-	t_game *p;
+	t_game	*p;
+
+	if (!ptr)
+		return ;
 	p = (t_game *)ptr;
 	del_status((void *)p->cur);
 	free(p);
@@ -30,7 +44,8 @@ void del_game(void *ptr)
 
 void	run_game(t_game *g)
 {
-	size_t size;
+	size_t	size;
+
 	size = dllst_len(g->cur->a);
 	if (size == 2)
 		sa(g->cur);
@@ -44,13 +59,13 @@ void	run_game(t_game *g)
 		sort_large(g->cur);
 }
 
-int main(int argc, char** argv)
+int	main(int argc, char **argv)
 {
-	t_game *g;
+	t_game	*g;
 
-	validate_arg(argc-1, argv+1);
-	g = init_game(argc-1, argv+1);
-	if(is_sorted_dll(g->cur->a))
+	validate_arg(argc - 1, argv + 1);
+	g = init_game(argc - 1, argv + 1);
+	if (is_sorted_dll(g->cur->a))
 		exit(EXIT_SUCCESS);
 	compress(g->cur->a);
 	print_state(g->cur);
