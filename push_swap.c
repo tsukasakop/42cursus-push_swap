@@ -12,7 +12,6 @@ void	node_print(t_stack *s, size_t i, void *params)
 {
 	(void)i;
 	(void)params;
-	PRINT("(%p)", s);
 	PRINT("%d, ", s->val);
 }
 
@@ -43,9 +42,9 @@ void	dllst_print(t_stack *s)
 
 void	print_state(t_state *s)
 {
-	PRINT(".a(%p) = ", s->a);
+	PRINT(".a = ");
 	dllst_print(s->a);
-	PRINT(".b(%p) = ", s->b);
+	PRINT(".b = ");
 	dllst_print(s->b);
 }
 
@@ -329,6 +328,47 @@ bool	r_rotate(t_stack **s)
 	return true;
 }
 
+ssize_t	find(t_stack *s, int val)
+{
+	t_stack *cur;
+	ssize_t cnt;
+
+	if(s == NULL)
+		return -1;
+	cnt = 0;
+	cur = s;
+	while(cur->val != val)
+	{
+		cnt++;
+		cur = cur->next;
+		if(cur == s)
+			return -1;
+	}
+	return cnt;
+}
+
+bool	raise_up(t_stack **s, int val)
+{
+	bool (*f)(t_stack **);
+	size_t size;
+	ssize_t cnt;
+
+	cnt = find(*s, val);
+	if (cnt == -1)
+		return false;
+	size = dllst_len(*s);
+	if(cnt < size / 2)
+		f = rotate;
+	else
+	{
+		cnt = size - cnt;
+		f = r_rotate;
+	}
+	while(cnt--)
+		f(s);
+	return true;
+}
+
 bool	sa(t_state *s)
 {
 	return swap(&s->a);
@@ -346,12 +386,12 @@ bool	ss(t_state *s)
 
 bool	pa(t_state *s)
 {
-	return push(&s->a, &s->b);
+	return push(&s->b, &s->a);
 }
 
 bool	pb(t_state *s)
 {
-	return push(&s->b, &s->a);
+	return push(&s->a, &s->b);
 }
 
 bool	ra(t_state *s)
@@ -417,8 +457,8 @@ bool	is_sorted_dll(t_dllst *s)
 		return true;
 	t_dllst *cur;
 	int prev;
+	prev = s->val;
 	cur = s->next;
-	prev = INT_MIN;
 	while (cur != s)
 	{
 		if (cur->val < prev)
@@ -429,28 +469,92 @@ bool	is_sorted_dll(t_dllst *s)
 	return true;
 }
 
-/*
-void	sort3(t_state *s)
+int intmin(int *ar, size_t s)
 {
-	
+	int min;
+	min = INT_MAX;
+	while(s--)
+	{
+		if (*ar < min)
+			min = *ar;
+		ar++;
+	}
+	return min;
+}
+
+int intmax(int *ar, size_t s)
+{
+	int max;
+	max = INT_MIN;
+	while(s--)
+	{
+		if (*ar > max)
+			max = *ar;
+		ar++;
+	}
+	return max;
+}
+
+bool	sort3(t_state *s)
+{
+	int l;
+	int h;
+
+	l = intmin((int [3]){s->a->val, s->a->next->val, s->a->next->next->val}, 3);
+	h = intmax((int [3]){s->a->val, s->a->next->val, s->a->next->next->val}, 3);
+	if (s->a->val == l && s->a->prev->val == h)
+		return true;
+	if (s->a->val == l && s->a->next->val == h)
+		return sa(s) && ra(s);
+	if (s->a->prev->val == l && s->a->next->val == h)
+		return rra(s);
+	if (s->a->prev->val == h && s->a->next->val == l)
+		return sa(s);
+	if (s->a->val == h && s->a->next->val == l)
+		return ra(s);
+	if (s->a->val == h && s->a->prev->val == l)
+		return ra(s) && sa(s);
+	return false;
+}
+
+bool	sort4(t_state *s)
+{
+	pb(s);
+	sort3(s);
+	if(s->b->val == 0)
+		return pa(s);
+	if(s->b->val == 1)
+		return ra(s) && pa(s) && rra(s);
+	if(s->b->val == 2)
+		return rra(s) && pa(s) && ra(s) && ra(s);
+	if(s->b->val == 3)
+		return pa(s) && ra(s);
+	return false;
+}
+void	sort5(t_state *s)
+{
+	raise_up(&s->a, 4);
+	pb(s);
+	sort4(s);
+	pa(s);
+	ra(s);
 }
 
 void	run_game(t_game *g)
 {
 	size_t size;
-	size = dllst_len(size);
+	size = dllst_len(g->cur->a);
 	if (size == 2)
 		sa(g->cur);
 	if (size == 3)
-		sort3(g);
+		sort3(g->cur);
+	if (size == 4)
+		sort4(g->cur);
 	if (size == 5)
-		sort4(g);
-	if (size == 5)
-		sort5(g);
-	else
-		sort(g, size);
+		sort5(g->cur);
+//	else
+//		sort(g, size);
 }
-*/
 
 void	test_state(t_game *g)
 {
@@ -497,8 +601,6 @@ void	test_state(t_game *g)
 	PRINT("Test rrr\n");
 	rrr(g->cur);
 	print_state(g->cur);
-/*
-*/
 }
 
 void	put_on_arr(t_dllst *n, size_t i, void *param)
@@ -574,7 +676,9 @@ int main(int argc, char** argv)
 	if(is_sorted_dll(g->cur->a))
 		exit(EXIT_SUCCESS);
 	compress(g->cur->a);
+	print_state(g->cur);
 	run_game(g);
+	print_state(g->cur);
 	//test_state(g);
 	del_game(g);
 	exit(EXIT_SUCCESS);

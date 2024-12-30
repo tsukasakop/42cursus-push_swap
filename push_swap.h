@@ -74,7 +74,6 @@ int get_score(t_state *s);
 
 t_state* arg2state(int c, char **v);
 t_game* init_game(int c, char **v);
-void	run_game(t_game*, int gen);
 
 void	validate_arg(int, char**);
 #endif
