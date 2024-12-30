@@ -9,7 +9,7 @@ t_dllst	**dllst2arr(t_stack *s)
 {
 	t_dllst **ar;
 
-	ar = (t_dllst **)calloc(sizeof(t_dllst *),dllst_len(s) + 1);
+	ar = (t_dllst **)ft_calloc(sizeof(t_dllst *),dllst_len(s) + 1);
 	if (ar == NULL)
 		raise_err();
 	dllst_iter(s, put_on_arr, (void *)ar);

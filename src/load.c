@@ -6,8 +6,7 @@ t_stack *str2stack(char *s)
 	p = malloc(sizeof(t_stack));
 	if(!p)
 		return NULL;
-	// TODO: Replace to ft_atoi
-	p->val = atoi((const char *)s);
+	p->val = ft_atoi((const char *)s);
 	p->prev = NULL;
 	p->next = NULL;
 	return p;
@@ -20,7 +19,6 @@ t_stack *int2stack(int i)
 	p = malloc(sizeof(t_stack));
 	if(!p)
 		return NULL;
-	// TODO: Replace to ft_atoi
 	p->val = i;
 	p->prev = NULL;
 	p->next = NULL;
@@ -57,8 +55,7 @@ t_state *arg2state(int n, char **s)
 {
 	t_state *state;
 	t_stack *cur;
-	// TODO: Replace to ft_calloc
-	state = (t_state *)calloc(sizeof(t_state), 1);
+	state = (t_state *)ft_calloc(sizeof(t_state), 1);
 	assert_null((void *)state, NULL, NULL);
 	state->a = str2stack(*s);
 	assert_null((void *)state->a, state, del_status);

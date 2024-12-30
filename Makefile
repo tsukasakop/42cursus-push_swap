@@ -6,20 +6,19 @@
 #    By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/09 00:35:59 by tkondo            #+#    #+#              #
-#    Updated: 2024/12/31 01:12:10 by tkondo           ###   ########.fr        #
+#    Updated: 2024/12/31 02:14:17 by tkondo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
-INCLUDE_DIR = -Iinclude
-# -I./libft/include
+INCLUDE_DIR = -Iinclude -I./libft/include
 CFLAGS = -c -fPIE -Wall -Wextra -Werror
 
 SRC_DIR = src
 OBJ_DIR = bin
-#LIBS = libft/libft.a
-#LIB_DIR = -L./libft
-#LFLAGS = -lft
+LIBS = libft/libft.a
+LIB_DIR = -L./libft
+LFLAGS = -lft
 NAME = push_swap
 TARGET =\
 	act_interface0\
@@ -58,6 +57,7 @@ libft/libft.a:
 
 clean:
 	rm -f $(OBJS)
+	@make -C libft fclean
 
 fclean: clean
 	rm -f $(NAME)

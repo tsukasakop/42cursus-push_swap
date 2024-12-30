@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 20:00:46 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 01:10:28 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:06:01 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@
 # define N_STEPS_TO_READ 1
 #endif
 
-#define PRINT(...) fprintf(stderr, __VA_ARGS__)
-#define ft_printf(...) printf(__VA_ARGS__)
-#define ft_fprintf(...) fprintf(__VA_ARGS__)
+#define PRINT(...) ft_fprintf(ft_stderr(), __VA_ARGS__)
 
+#include <libft.h>
+#include <ft_stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <unistd.h>
