@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:23:42 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:47:30 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:54:57 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,16 @@ void	raise_err(void)
 	ft_exit(EXIT_FAILURE);
 }
 
-void	assert_null(void *p, void *to_del, void (*del)(void *))
+void	assert_null(void *p)
 {
 	if (p)
 		return ;
-	if (to_del && del)
-		del(to_del);
 	raise_err();
 }
 
-void	assert_integer(char *s, void *to_del, void (*del)(void *))
+void	assert_integer(char *s)
 {
-	assert_null((void *)s, to_del, del);
+	assert_null((void *)s);
 	if (*s == '+' || *s == '-')
 		s++;
 	if (!ft_isdigit(*s))

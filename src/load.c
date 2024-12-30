@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:29:53 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:46:54 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:56:45 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,14 +70,14 @@ t_state	*arg2state(int n, char **s)
 	t_stack	*cur;
 
 	state = (t_state *)ft_g_mmcalloc(sizeof(t_state), 1);
-	assert_null((void *)state, NULL, NULL);
+	assert_null((void *)state);
 	state->a = str2stack(*s);
-	assert_null((void *)state->a, state, del_status);
+	assert_null((void *)state->a);
 	cur = state->a;
 	while (--n)
 	{
 		cur->next = str2stack(*++s);
-		assert_null((void *)cur->next, state, del_status);
+		assert_null((void *)cur->next);
 		cur->next->prev = cur;
 		cur = cur->next;
 	}

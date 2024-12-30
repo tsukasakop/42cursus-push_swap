@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/30 20:00:46 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:40:45 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:55:37 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 
 # include <ctype.h>
 # include <ft_stdio.h>
+# include <ft_stdlib.h>
+# include <ft_memory.h>
 # include <libft.h>
 # include <limits.h>
 # include <stdbool.h>
@@ -64,9 +66,8 @@ void					rra(t_state *s);
 void					rrb(t_state *s);
 void					rrr(t_state *s);
 void					raise_err(void);
-void					assert_null(void *p, void *to_del, void (*del)(void *));
-void					assert_integer(char *s, void *to_del,
-							void (*del)(void *));
+void					assert_null(void *p);
+void					assert_integer(char *s);
 bool					is_sorted_dll(t_dllst *s);
 int						intmin(int *ar, size_t s);
 int						intmax(int *ar, size_t s);
@@ -75,9 +76,6 @@ t_dllst					**dllst2arr(t_stack *s);
 void					swap_addr(void **lhs, void **rhs);
 t_dllst					**sorted_arr(t_stack *s);
 void					compress(t_stack *s);
-void					del_stack(void *ptr);
-void					del_state(void *ptr);
-void					del_status(void *ptr);
 void					dllst_iter(t_dllst *s, void (*f)(t_dllst *s, size_t i,
 								void *params), void *params);
 void					node_print(t_stack *s, size_t i, void *params);
@@ -104,7 +102,6 @@ ssize_t					find(t_stack *s, int val);
 bool					raise_up(t_stack **s, t_state *state, int val);
 t_game					*init_game(int c, char **v);
 void					validate_arg(int c, char **v);
-void					del_game(void *ptr);
 void					run_game(t_game *g);
 int						main(int argc, char **argv);
 #endif

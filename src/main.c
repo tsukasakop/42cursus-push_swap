@@ -6,7 +6,7 @@
 /*   By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/31 02:28:28 by tkondo            #+#    #+#             */
-/*   Updated: 2024/12/31 02:48:19 by tkondo           ###   ########.fr       */
+/*   Updated: 2024/12/31 02:56:05 by tkondo           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ t_game	*init_game(int c, char **v)
 	t_game	*game;
 
 	game = ft_g_mmmalloc(sizeof(t_game));
-	assert_null((void *)game, NULL, NULL);
+	assert_null((void *)game);
 	game->cur = arg2state(c, v);
 	return (game);
 }
@@ -27,19 +27,8 @@ void	validate_arg(int c, char **v)
 	if (c == 0)
 		raise_err();
 	while (c--)
-		assert_integer(*v++, NULL, NULL);
+		assert_integer(*v++);
 	return ;
-}
-
-void	del_game(void *ptr)
-{
-	t_game	*p;
-
-	if (!ptr)
-		return ;
-	p = (t_game *)ptr;
-	del_status((void *)p->cur);
-	free(p);
 }
 
 void	run_game(t_game *g)
@@ -70,6 +59,5 @@ int	main(int argc, char **argv)
 		raise_err();
 	compress(g->cur->a);
 	run_game(g);
-	del_game(g);
 	ft_exit(EXIT_SUCCESS);
 }

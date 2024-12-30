@@ -6,7 +6,7 @@
 #    By: tkondo <tkondo@student.42tokyo.jp>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/09 00:35:59 by tkondo            #+#    #+#              #
-#    Updated: 2024/12/31 02:14:17 by tkondo           ###   ########.fr        #
+#    Updated: 2024/12/31 02:59:40 by tkondo           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,6 @@ TARGET =\
 	assert\
 	compress0\
 	compress1\
-	delete\
 	dllst0\
 	dllst1\
 	load\
